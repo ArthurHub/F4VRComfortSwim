@@ -1,7 +1,7 @@
 {
   "configurePresets": [
     {
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/buildvr",
       "errors": {
         "deprecated": true
       },
@@ -11,12 +11,6 @@
         "deprecated": true,
         "dev": true
       }
-    },
-    {
-      "binaryDir": "${sourceDir}/buildvr",
-      "cacheVariables": {},
-      "hidden": true,
-      "name": "f4vr"
     },
     {
       "cacheVariables": {
@@ -38,7 +32,7 @@
         "CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /external:anglebrackets /external:W0 $penv{CXXFLAGS}"
       },
       "generator": "Visual Studio 17 2022",
-      "inherits": ["f4vr", "cmake-dev", "vcpkg", "windows"],
+      "inherits": ["cmake-dev", "vcpkg", "windows"],
       "name": "default",
       "toolset": "v143",
       "architecture": {

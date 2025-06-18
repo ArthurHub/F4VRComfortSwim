@@ -14,7 +14,7 @@ set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Include guards
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
-	message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
+	message(FATAL_ERROR ">> In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
 endif()
 
 
@@ -33,13 +33,13 @@ if(DEFINED VCPKG_ROOT)
 	set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
 	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STRING "")
 else()
-	message(FATAL_ERROR "Variable VCPKG_ROOT is not set!")
+	message(FATAL_ERROR ">> Variable VCPKG_ROOT is not set!")
 endif()
 
 
 # Setup CommonLibF4 path
 set_from_environment(CommonLibF4Path)
-find_path(CommonLibF4Path
+find_path(CommonLibF4PathLocal
 	CommonLibF4/include/REL/Relocation.h
 	PATHS 
 	  ${CommonLibF4Path}  
@@ -47,8 +47,8 @@ find_path(CommonLibF4Path
 	  external/CommonLibF4
 	  ../CommonLibF4 
 )
-if(${CommonLibF4Path} STREQUAL "CommonLibF4Path-NOTFOUND")
-	message(FATAL_ERROR "CommonLibF4 Path not found!")
+if(${CommonLibF4PathLocal} STREQUAL "CommonLibF4PathLocal-NOTFOUND")
+	message(FATAL_ERROR ">> CommonLibF4 Path not found! didn't init git modules? or not set CommonLibF4Path env variable?")
 endif()
 
 
@@ -59,7 +59,7 @@ project(
 	LANGUAGES CXX
 )
 message(STATUS ">>> Building '${PROJECT_NAME}' v:${PROJECT_VERSION}")
-message(STATUS ">>> Using CommonLibF4: '${CommonLibF4Path}'")
+message(STATUS ">>> Using CommonLibF4: '${CommonLibF4PathLocal}'")
 
 
 # Set build flags
@@ -78,9 +78,9 @@ set(ENABLE_FALLOUT_NG OFF CACHE BOOL "")
 set(ENABLE_FALLOUT_F4 OFF CACHE BOOL "")
 set(ENABLE_FALLOUT_VR ON CACHE BOOL "")
 if(NOT F4SE_SUPPORT_XBYAK OR ENABLE_FALLOUT_F4 OR ENABLE_FALLOUT_NG OR NOT ENABLE_FALLOUT_VR)
-    message(FATAL_ERROR "Invalid CommonLibF4 config, try deleting buildvr and rebuilding")
+    message(FATAL_ERROR ">> Invalid CommonLibF4 config, try deleting buildvr and rebuilding")
 endif()
-add_subdirectory(${CommonLibF4Path} "CommonLibF4" EXCLUDE_FROM_ALL)
+add_subdirectory(${CommonLibF4PathLocal} "CommonLibF4" EXCLUDE_FROM_ALL)
 # IMPORTANT:
 # For CommonLibF4 to build successfully you must satisfy it's vcpkg dependencies
 # AND specify <"builtin-baseline": "b4a3d89125e45bc8f80fb94bef9761d4f4e14fb9"> as it will fail to build with latests"
@@ -142,7 +142,7 @@ target_include_directories(
 	PRIVATE
 	${BUILD_DIR}/include
 	${SOURCE_DIR}
-	${CommonLibF4Path}/CommonLibF4/include
+	${CommonLibF4PathLocal}/CommonLibF4/include
 )
 # Libraries (.lib) to link
 target_link_libraries(
