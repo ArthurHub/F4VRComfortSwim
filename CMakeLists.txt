@@ -221,3 +221,22 @@ target_link_options(
 
 # fix a warning with /Ob2 being overridden with /Ob3
 string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+
+# Post build command to copy plugins
+if(POST_BUILD_COPY_PLUGIN)
+	if(DEFINED COPY_PLUGIN_BASE_PATH)
+		message(STATUS ">>> Post build copy to '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'")
+		add_custom_command(
+			TARGET ${PROJECT_NAME}
+			POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> ${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/
+			COMMAND ${CMAKE_COMMAND} -E echo "Copied ${PROJECT_NAME}.dll and .pdb to plugins folder: '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'"
+		)
+	else()
+		message(FATAL_ERROR	"Variable 'COPY_PLUGIN_BASE_PATH' is not defined but 'POST_BUILD_COPY_PLUGIN' is true!")
+	endif()
+else()
+	message(STATUS ">>> No post build copy")
+endif()
