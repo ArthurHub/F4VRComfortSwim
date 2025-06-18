@@ -1,24 +1,24 @@
 cmake_minimum_required(VERSION 3.23)
 
 
-# Project
+# >>> Project
 set(NAME "F4VRComfortSwim")
 set(VERSION 0.1.0)
 
 
-# Folders
+# >>> Folders
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(SOURCE_DIR "${ROOT_DIR}/src")
 set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
 
-# Include guards
+# >>> Include guards
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 	message(FATAL_ERROR ">> In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there.")
 endif()
 
 
-# Set variable from environment by same name
+# >>> Set variable from environment by same name
 macro(set_from_environment VARIABLE)
 	if(NOT DEFINED ${VARIABLE} AND DEFINED ENV{${VARIABLE}})
 		set(${VARIABLE} $ENV{${VARIABLE}})
@@ -26,7 +26,7 @@ macro(set_from_environment VARIABLE)
 endmacro()
 
 
-# Setup vcpkg
+# >>> Setup vcpkg
 set_from_environment(VCPKG_ROOT)
 if(DEFINED VCPKG_ROOT)
 	set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
@@ -37,7 +37,7 @@ else()
 endif()
 
 
-# Setup CommonLibF4 path
+# >>> Setup CommonLibF4 path
 set_from_environment(CommonLibF4Path)
 find_path(CommonLibF4PathLocal
 	CommonLibF4/include/REL/Relocation.h
@@ -52,17 +52,17 @@ if(${CommonLibF4PathLocal} STREQUAL "CommonLibF4PathLocal-NOTFOUND")
 endif()
 
 
-# Create Project
+# >>> Create Project
 project(
 	${NAME}
 	VERSION ${VERSION}
 	LANGUAGES CXX
 )
-message(STATUS ">>> Building '${PROJECT_NAME}' v:${PROJECT_VERSION}")
-message(STATUS ">>> Using CommonLibF4: '${CommonLibF4PathLocal}'")
+message(">>> Building '${PROJECT_NAME}' v:${PROJECT_VERSION}")
+message(">>> Using CommonLibF4: '${CommonLibF4PathLocal}'")
 
 
-# Set build flags
+# >>> Set build flags
 # Suppresses Microsoft's "unsafe function" warnings (like strcpy, sprintf, etc.) in MSVC.
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 # Optimizations 
@@ -72,7 +72,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 set(Boost_USE_STATIC_LIBS ON)
 
 
-# Build CommonLibF4 dependency for Fallout-4-VR
+# >>> Build CommonLibF4 dependency for Fallout-4-VR
 set(F4SE_SUPPORT_XBYAK ON CACHE BOOL "")
 set(ENABLE_FALLOUT_NG OFF CACHE BOOL "")
 set(ENABLE_FALLOUT_F4 OFF CACHE BOOL "")
@@ -81,12 +81,12 @@ if(NOT F4SE_SUPPORT_XBYAK OR ENABLE_FALLOUT_F4 OR ENABLE_FALLOUT_NG OR NOT ENABL
     message(FATAL_ERROR ">> Invalid CommonLibF4 config, try deleting buildvr and rebuilding")
 endif()
 add_subdirectory(${CommonLibF4PathLocal} "CommonLibF4" EXCLUDE_FROM_ALL)
-# IMPORTANT:
+# >>> IMPORTANT:
 # For CommonLibF4 to build successfully you must satisfy it's vcpkg dependencies
 # AND specify <"builtin-baseline": "b4a3d89125e45bc8f80fb94bef9761d4f4e14fb9"> as it will fail to build with latests"
 
 
-# Add version files
+# >>> Add version files
 configure_file(
 	${ROOT_DIR}/cmake/version.rc.in
 	${BUILD_DIR}/version.rc
@@ -103,7 +103,7 @@ source_group(
 )
 
 
-# Add all headers and source files in src folder
+# >>> Add all headers and source files in src folder
 file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${SOURCE_DIR}/*.h")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${SOURCE_DIR}/*.cpp")
 source_group(
@@ -112,7 +112,7 @@ source_group(
 )
 
 
-# Create VS project for DLL
+# >>> Create VS project for DLL
 add_library(
 	${PROJECT_NAME}
 	SHARED
@@ -158,7 +158,7 @@ target_precompile_headers(
 )
 
 
-# Set project options
+# >>> Set project options
 target_compile_options(
 	${PROJECT_NAME}
 	PRIVATE
@@ -219,24 +219,40 @@ target_link_options(
 	"$<$<CONFIG:RELEASE>:/INCREMENTAL:NO;/OPT:REF;/OPT:ICF;/DEBUG:FULL>"
 )
 
-# fix a warning with /Ob2 being overridden with /Ob3
+# >>> fix a warning with /Ob2 being overridden with /Ob3
 string(REPLACE "/Ob2" "/Ob3" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
 
-# Post build command to copy plugins
+# >>> Post build command to copy plugins
 if(POST_BUILD_COPY_PLUGIN)
 	if(DEFINED COPY_PLUGIN_BASE_PATH)
-		message(STATUS ">>> Post build copy to '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'")
+		message(">>> Create post build command: copy targets to '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'")
 		add_custom_command(
 			TARGET ${PROJECT_NAME}
 			POST_BUILD
+			COMMENT "Copying ${PROJECT_NAME}.dll and .pdb to plugins folder: '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'"
 			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${PROJECT_NAME}> ${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/
 			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:${PROJECT_NAME}> ${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/
-			COMMAND ${CMAKE_COMMAND} -E echo "Copied ${PROJECT_NAME}.dll and .pdb to plugins folder: '${COPY_PLUGIN_BASE_PATH}/F4SE/Plugins/'"
 		)
 	else()
 		message(FATAL_ERROR	"Variable 'COPY_PLUGIN_BASE_PATH' is not defined but 'POST_BUILD_COPY_PLUGIN' is true!")
 	endif()
 else()
-	message(STATUS ">>> No post build copy")
+	message(">>> No post build copy")
 endif()
+
+
+# >>> Post build for release only to package the mod into a .7z file
+message(">>> Create post build command: package mod on release build")
+add_custom_command(
+  TARGET ${PROJECT_NAME}
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -DPROJECT_NAME=${PROJECT_NAME}
+						   -DPROJECT_VERSION=${PROJECT_VERSION}
+                           -DROOT_DIR=${ROOT_DIR}
+                           -DBUILD_DIR=${BUILD_DIR}
+						   -DTARGET_FILE="$<TARGET_FILE:${PROJECT_NAME}>"
+						   -DTARGET_PDB_FILE="$<TARGET_PDB_FILE:${PROJECT_NAME}>"
+						   -DCONFIG=$(Configuration)
+                           -P "${ROOT_DIR}/cmake/package.cmake"
+)

@@ -1,7 +1,7 @@
 {
   "configurePresets": [
     {
-      "binaryDir": "${sourceDir}/buildvr",
+      "binaryDir": "${sourceDir}/build",
       "errors": {
         "deprecated": true
       },
@@ -32,12 +32,16 @@
         "CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /external:anglebrackets /external:W0 $penv{CXXFLAGS}"
       },
       "generator": "Visual Studio 17 2022",
-      "inherits": ["cmake-dev", "vcpkg", "windows"],
-      "name": "default",
       "toolset": "v143",
       "architecture": {
         "value": "x64"
-      }
+      },
+      "hidden": true,
+      "name": "vs2022"
+    },
+    {
+      "inherits": ["cmake-dev", "vcpkg", "windows", "vs2022"],
+      "name": "default"
     }
   ],
   "version": 3
