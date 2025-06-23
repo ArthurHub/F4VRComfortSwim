@@ -4,7 +4,7 @@ using namespace common;
 
 namespace comfort_swim
 {
-    void Config::loadAllConfig()
+    void Config::load()
     {
         logger::info("Load ini config...");
         createDirDeep(INI_PATH);

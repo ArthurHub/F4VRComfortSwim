@@ -206,6 +206,16 @@ namespace common
     }
 
     /**
+     * Wait for the debugger to attach.
+     */
+    void waitForDebugger()
+    {
+        while (!IsDebuggerPresent()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+
+    /**
      * Get the current time in milliseconds.
      */
     uint64_t nowMillis()

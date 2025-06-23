@@ -21,29 +21,29 @@ namespace fs = std::filesystem;
         explicit log_func(spdlog::format_string_t<Args...> fmt, Args&&... args, const std::source_location& loc = std::source_location::current())    \
         {                                                                                                                                             \
             spdlog::source_loc sourceLoc{ loc.file_name(), static_cast<int>(loc.line()), loc.function_name() };                                       \
-            spdlog::log(sourceLoc, spdlog::level::log_level, fmt, std::forward<Args>(args)...);                                                       \
+            internal::_logger->log(sourceLoc, spdlog::level::log_level, fmt, std::forward<Args>(args)...);                                                       \
         }                                                                                                                                             \
     };                                                                                                                                                \
                                                                                                                                                       \
     template <class... Args>                                                                                                                          \
     log_func(spdlog::format_string_t<Args...>, Args&&...) -> log_func<Args...>;
 
-namespace
+namespace common::logger::internal
 {
     /**
      * Global logger instance
      */
-    std::shared_ptr<spdlog::logger> _logger;
+    inline std::shared_ptr<spdlog::logger> _logger;
 
     /**
      * Current log level
      */
-    int _logLevel = -1;
+    inline int _logLevel = -1;
 
     /**
      * Holds the last time of a log message per key.
      */
-    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _sampleMessagesTtl;
+    inline std::unordered_map<std::string, std::chrono::steady_clock::time_point> _sampleMessagesTtl;
 
     /**
      * Same as calling _MESSAGE but only one message log per "time" second, other logs are dropped.
@@ -106,13 +106,13 @@ namespace common::logger
         *path /= fmt::format("{}.log"sv, logFileName);
         auto sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path->string(), 1024 * 1024 * 10, 5, true);
 
-        _logger = std::make_shared<spdlog::logger>("GLOBAL"s, std::move(sink));
+        internal::_logger = std::make_shared<spdlog::logger>("GLOBAL"s, std::move(sink));
 
         constexpr auto level = spdlog::level::info;
-        _logger->set_level(level);
-        _logger->flush_on(level);
+        internal::_logger->set_level(level);
+        internal::_logger->flush_on(level);
 
-        spdlog::set_default_logger(_logger);
+        spdlog::set_default_logger(internal::_logger);
 
         // see: https://github.com/gabime/spdlog/wiki/Custom-formatting
         spdlog::set_pattern("%H:%M:%S.%e %L: %v"s);
@@ -123,14 +123,14 @@ namespace common::logger
      */
     inline void setLogLevel(int logLevel)
     {
-        if (_logLevel == logLevel)
+        if (internal::_logLevel == logLevel)
             return;
 
         info("Set log level = {}", logLevel);
-        _logLevel = logLevel;
+        internal::_logLevel = logLevel;
         const auto levelEnum = static_cast<spdlog::level::level_enum>(logLevel);
-        _logger->set_level(levelEnum);
-        _logger->flush_on(levelEnum);
+        internal::_logger->set_level(levelEnum);
+        internal::_logger->flush_on(levelEnum);
     }
 }
 

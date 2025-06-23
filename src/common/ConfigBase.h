@@ -380,7 +380,7 @@ namespace common
          * Setup filesystem watch on INI config file to reload config when changes are detected.
          * Handling duplicate modified events from file-watcher:
          * There can be 3-5 events fired for 1 change. Sometimes the last even can be a full second after a change.
-         * To prevent it we check the file last write time and ignore events that 
+         * To prevent it we check the file last write time and ignore events that
          */
         void startIniConfigFileWatch()
         {

@@ -36,13 +36,17 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
-    logger::init(Version::PROJECT);
+    try {
+        logger::init(Version::PROJECT);
+        logPluginGameStart();
 
-    comfort_swim::g_config.loadAllConfig();
+        comfort_swim::g_config.load();
 
-    logPluginGameStart();
+        F4SE::Init(a_f4se, false);
 
-    F4SE::Init(a_f4se, false);
-
-    return true;
+        return true;
+    } catch (const std::exception& ex) {
+        logger::error("Unhandled exception: {}", ex.what());
+        return false;
+    }
 }

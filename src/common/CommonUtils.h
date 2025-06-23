@@ -27,6 +27,7 @@ namespace common
     void moveAllFilesInFolderSafe(const std::string& fromPath, const std::string& toPath);
 
     // Miscellaneous functions
+    void waitForDebugger();
     uint64_t nowMillis();
     std::string toStringWithPrecision(double value, int precision = 2);
     std::string getCurrentTimeString();

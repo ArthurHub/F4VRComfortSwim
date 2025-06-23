@@ -16,7 +16,7 @@ namespace comfort_swim
         explicit Config() :
             ConfigBase(INI_PATH, IDR_CONFIG_INI, INI_VERSION) {}
 
-        void loadAllConfig();
+        void load();
 
     protected:
         virtual void loadIniConfigInternal(const CSimpleIniA& ini) override;
