@@ -97,9 +97,14 @@ configure_file(
 	${BUILD_DIR}/include/Version.h
 	@ONLY
 )
+configure_file(
+	${ROOT_DIR}/cmake/resources.rc.in
+	${BUILD_DIR}/resources.rc
+	@ONLY
+)
 source_group(
 	TREE ${BUILD_DIR}
-	FILES ${BUILD_DIR}/include/Version.h
+	FILES ${BUILD_DIR}/include/Version.h ${BUILD_DIR}/resources.rc
 )
 
 
@@ -111,6 +116,15 @@ source_group(
 	FILES ${headers} ${sources}
 )
 
+# >>> Add resource files
+set(resource_files
+	"${ROOT_DIR}/data/config/F4VRComfortSwim.ini"
+)
+source_group(
+	"Resource Files"
+	FILES ${resource_files}
+)
+
 
 # >>> Create VS project for DLL
 add_library(
@@ -118,8 +132,10 @@ add_library(
 	SHARED
 	${headers}
 	${sources}
+	${resource_files}
 	${BUILD_DIR}/include/Version.h
 	${BUILD_DIR}/version.rc
+	${BUILD_DIR}/resources.rc
 	"${ROOT_DIR}/.clang-format"
 	"${ROOT_DIR}/.editorconfig"
 )

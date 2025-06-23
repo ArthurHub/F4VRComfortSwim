@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "common/Logger.h"
 
 using namespace common;
@@ -36,6 +37,8 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
     logger::init(Version::PROJECT);
+
+    comfort_swim::g_config.loadAllConfig();
 
     logPluginGameStart();
 

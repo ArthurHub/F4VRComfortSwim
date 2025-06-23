@@ -6,12 +6,14 @@
 #include <nlohmann/json.hpp>
 #include <thomasmonkman-filewatch/FileWatch.hpp>
 
+#include "CommonUtils.h"
 #include "Logger.h"
 
 using json = nlohmann::json;
 
 namespace common
 {
+    static const auto BASE_PATH = getRelativePathInDocuments(R"(\My Games\Fallout4VR\Mods_Config)");
     constexpr auto INI_SECTION_DEBUG = "Debug";
 
     class ConfigBase
@@ -39,15 +41,14 @@ namespace common
         bool checkDebugDumpDataOnceFor(const char* name)
         {
             const auto idx = _debugDumpDataOnceNames.find(name);
-            if (idx == std::string::npos)
-            {
+            if (idx == std::string::npos) {
                 return false;
             }
             _debugDumpDataOnceNames = _debugDumpDataOnceNames.erase(idx, strlen(name));
             // write to INI for auto-reload not to re-enable it
             saveIniConfigValue(INI_SECTION_DEBUG, "DebugDumpDataOnceNames", _debugDumpDataOnceNames.c_str());
 
-            Log::info("---- Debug Dump Data check passed for '%s' ----", name);
+            logger::info("---- Debug Dump Data check passed for '{}' ----", name);
             return true;
         }
 
@@ -74,9 +75,8 @@ namespace common
 
             loadIniConfigValues();
 
-            if (_iniConfigVersion < _iniConfigLatestVersion)
-            {
-                Log::info("Updating INI config version %d -> %d", _iniConfigVersion, _iniConfigLatestVersion);
+            if (_iniConfigVersion < _iniConfigLatestVersion) {
+                logger::info("Updating INI config version {} -> {}", _iniConfigVersion, _iniConfigLatestVersion);
                 updateIniConfigToLatestVersion();
 
                 // reload the config after update
@@ -94,9 +94,8 @@ namespace common
         {
             CSimpleIniA ini;
             const SI_Error rc = ini.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to load INI config file! Error:", rc);
+            if (rc < 0) {
+                logger::warn("Failed to load INI config file! Error:", rc);
                 throw std::runtime_error("Failed to load INI config file! Error: " + std::to_string(rc));
             }
 
@@ -108,7 +107,7 @@ namespace common
             _debugDumpDataOnceNames = ini.GetValue(INI_SECTION_DEBUG, "DebugDumpDataOnceNames", "");
 
             // set log after loading from config
-            Log::setLogLevel(_logLevel);
+            logger::setLogLevel(_logLevel);
 
             // let inherited class load all its values
             loadIniConfigInternal(ini);
@@ -122,9 +121,8 @@ namespace common
         {
             CSimpleIniA ini;
             SI_Error rc = ini.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to open INI config for saving with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to open INI config for saving with code: {}", rc);
                 return;
             }
 
@@ -133,12 +131,10 @@ namespace common
 
             _ignoreNextIniFileChange.store(true);
             rc = ini.SaveFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::error("Config: Failed to save FRIK.ini. Error: %d", rc);
-            } else
-            {
-                Log::info("Config: Saving INI config successful");
+            if (rc < 0) {
+                logger::error("Config: Failed to save FRIK.ini. Error: {}", rc);
+            } else {
+                logger::info("Config: Saving INI config successful");
             }
         }
 
@@ -147,20 +143,18 @@ namespace common
          */
         void saveIniConfigValue(const char* section, const char* key, const bool value)
         {
-            Log::info("Config: Saving \"%s = %s\"", key, value ? "true" : "false");
+            logger::info("Config: Saving \"{} = {}\"", key, value ? "true" : "false");
             CSimpleIniA ini;
             SI_Error rc = ini.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
                 return;
             }
             ini.SetBoolValue(section, key, value);
             _ignoreNextIniFileChange.store(true);
             rc = ini.SaveFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
             }
         }
 
@@ -169,20 +163,18 @@ namespace common
          */
         void saveIniConfigValue(const char* section, const char* key, const float value)
         {
-            Log::info("Config: Saving \"%s = %f\"", key, value);
+            logger::info("Config: Saving \"{} = {}\"", key, value);
             CSimpleIniA ini;
             SI_Error rc = ini.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
                 return;
             }
             ini.SetDoubleValue(section, key, value);
             _ignoreNextIniFileChange.store(true);
             rc = ini.SaveFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
             }
         }
 
@@ -191,20 +183,18 @@ namespace common
          */
         void saveIniConfigValue(const char* section, const char* key, const char* value)
         {
-            Log::info("Config: Saving \"%s = %s\"", key, value);
+            logger::info("Config: Saving \"{} = {}\"", key, value);
             CSimpleIniA ini;
             SI_Error rc = ini.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
                 return;
             }
             ini.SetValue(section, key, value);
             _ignoreNextIniFileChange.store(true);
             rc = ini.SaveFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
-                Log::warn("Failed to save INI config value with code: %d", rc);
+            if (rc < 0) {
+                logger::warn("Failed to save INI config value with code: {}", rc);
             }
         }
 
@@ -212,24 +202,21 @@ namespace common
          * Load offset data from given json file path and store it in the given map.
          * Use the entry key in the json file but for everything to work properly the name of the json should match the key.
          */
-        static void loadOffsetJsonFile(const std::string& file, std::unordered_map<std::string, NiTransform>& offsetsMap)
+        static void loadOffsetJsonFile(const std::string& file, std::unordered_map<std::string, RE::NiTransform>& offsetsMap)
         {
             std::ifstream inF;
             inF.open(file, std::ios::in);
-            if (inF.fail())
-            {
-                Log::warn("cannot open %s", file.c_str());
+            if (inF.fail()) {
+                logger::warn("cannot open {}", file.c_str());
                 inF.close();
                 return;
             }
 
             json weaponJson;
-            try
-            {
+            try {
                 inF >> weaponJson;
-            } catch (json::parse_error& ex)
-            {
-                Log::info("cannot open %s: parse error at byte %d", file.c_str(), ex.byte);
+            } catch (json::parse_error& ex) {
+                logger::info("cannot open {}: parse error at byte {}", file.c_str(), ex.byte);
                 inF.close();
                 return;
             }
@@ -241,14 +228,12 @@ namespace common
         /**
          * Load all embedded in resources offsets in the given resource range.
          */
-        static std::unordered_map<std::string, NiTransform> loadEmbeddedOffsets(const WORD fromResourceId, const WORD toResourceId)
+        static std::unordered_map<std::string, RE::NiTransform> loadEmbeddedOffsets(const WORD fromResourceId, const WORD toResourceId)
         {
-            std::unordered_map<std::string, NiTransform> offsets;
-            for (WORD resourceId = fromResourceId; resourceId <= toResourceId; resourceId++)
-            {
+            std::unordered_map<std::string, RE::NiTransform> offsets;
+            for (WORD resourceId = fromResourceId; resourceId <= toResourceId; resourceId++) {
                 auto resourceOpt = getEmbeddedResourceAsStringIfExists(resourceId);
-                if (resourceOpt.has_value())
-                {
+                if (resourceOpt.has_value()) {
                     json json = json::parse(resourceOpt.value());
                     loadOffsetJsonToMap(json, offsets);
                 }
@@ -259,13 +244,11 @@ namespace common
         /**
          * Load all the offsets found in json files in a specific folder.
          */
-        static std::unordered_map<std::string, NiTransform> loadOffsetsFromFilesystem(const std::string& path)
+        static std::unordered_map<std::string, RE::NiTransform> loadOffsetsFromFilesystem(const std::string& path)
         {
-            std::unordered_map<std::string, NiTransform> offsets;
-            for (const auto& file : std::filesystem::directory_iterator(path))
-            {
-                if (file.exists() && !file.is_directory())
-                {
+            std::unordered_map<std::string, RE::NiTransform> offsets;
+            for (const auto& file : std::filesystem::directory_iterator(path)) {
+                if (file.exists() && !file.is_directory()) {
                     loadOffsetJsonFile(file.path().string(), offsets);
                 }
             }
@@ -275,14 +258,12 @@ namespace common
         /**
          * Save the given offsets transform to a json file using the given name.
          */
-        static void saveOffsetsToJsonFile(const std::string& name, const NiTransform& transform, const std::string& file)
+        static void saveOffsetsToJsonFile(const std::string& name, const RE::NiTransform& transform, const std::string& file)
         {
-            Log::info("Saving offsets '%s' to '%s'", name.c_str(), file.c_str());
+            logger::info("Saving offsets '{}' to '{}'", name.c_str(), file.c_str());
             json offsetJson;
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 4; j++)
-                {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 4; j++) {
                     offsetJson[name]["rotation"] = transform.rotate[i][j];
                 }
             }
@@ -293,34 +274,28 @@ namespace common
 
             std::ofstream outF;
             outF.open(file, std::ios::out);
-            if (outF.fail())
-            {
-                Log::info("cannot open '%s' for writing", file.c_str());
+            if (outF.fail()) {
+                logger::info("cannot open '{}' for writing", file.c_str());
                 return;
             }
-            try
-            {
+            try {
                 outF << std::setw(4) << offsetJson;
                 outF.close();
-            } catch (std::exception& e)
-            {
+            } catch (std::exception& e) {
                 outF.close();
-                Log::warn("Unable to save json '%s': %s", file.c_str(), e.what());
+                logger::warn("Unable to save json '{}': {}", file.c_str(), e.what());
             }
         }
 
         /**
          * Load the given json object with offset data into an offset map.
          */
-        static void loadOffsetJsonToMap(const ::json& json, std::unordered_map<std::string, NiTransform>& offsetsMap)
+        static void loadOffsetJsonToMap(const ::json& json, std::unordered_map<std::string, RE::NiTransform>& offsetsMap)
         {
-            for (auto& [key, value] : json.items())
-            {
-                NiTransform data;
-                for (int i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
+            for (auto& [key, value] : json.items()) {
+                RE::NiTransform data;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 4; j++) {
                         data.rotate[i][j] = value["rotation"][i++].get<float>();
                     }
                 }
@@ -343,8 +318,7 @@ namespace common
         {
             CSimpleIniA oldIni;
             SI_Error rc = oldIni.LoadFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
+            if (rc < 0) {
                 throw std::runtime_error("Failed to load old FRIK.ini file! Error: " + std::to_string(rc));
             }
 
@@ -354,36 +328,30 @@ namespace common
 
             CSimpleIniA newIni;
             rc = newIni.LoadFile(tmpIniPath.c_str());
-            if (rc < 0)
-            {
+            if (rc < 0) {
                 throw std::runtime_error("Failed to load new FRIK.ini file! Error: " + std::to_string(rc));
             }
 
             // remove temp ini file
             auto res = std::remove(tmpIniPath.c_str());
-            if (res != 0)
-            {
-                Log::warn("Failed to remove temp INI config with code: %d", res);
+            if (res != 0) {
+                logger::warn("Failed to remove temp INI config with code: {}", res);
             }
 
             // update all values in the new ini with the old ini values but only if they exist in the new
             std::list<CSimpleIniA::Entry> sectionsList;
             oldIni.GetAllSections(sectionsList);
-            for (const auto& section : sectionsList)
-            {
+            for (const auto& section : sectionsList) {
                 std::list<CSimpleIniA::Entry> keysList;
                 oldIni.GetAllKeys(section.pItem, keysList);
-                for (const auto& key : keysList)
-                {
+                for (const auto& key : keysList) {
                     const auto oldVal = oldIni.GetValue(section.pItem, key.pItem);
                     const auto newVal = newIni.GetValue(section.pItem, key.pItem);
-                    if (newVal != nullptr && std::strcmp(oldVal, newVal) != 0)
-                    {
-                        Log::info("Migrating %s.%s = %s", section.pItem, key.pItem, oldIni.GetValue(section.pItem, key.pItem));
+                    if (newVal != nullptr && std::strcmp(oldVal, newVal) != 0) {
+                        logger::info("Migrating {}.{} = {}", section.pItem, key.pItem, oldIni.GetValue(section.pItem, key.pItem));
                         newIni.SetValue(section.pItem, key.pItem, oldIni.GetValue(section.pItem, key.pItem));
-                    } else
-                    {
-                        Log::verbose("Skipping %s.%s (%s)", section.pItem, key.pItem, newVal == nullptr ? "removed" : "unchanged");
+                    } else {
+                        logger::debug("Skipping {}.{} ({})", section.pItem, key.pItem, newVal == nullptr ? "removed" : "unchanged");
                     }
                 }
             }
@@ -395,19 +363,17 @@ namespace common
             auto nameStr = std::string(_iniFilePath);
             nameStr = nameStr.replace(nameStr.length() - 4, 4, "_bkp_v" + std::to_string(_iniConfigVersion) + ".ini");
             res = std::rename(_iniFilePath.c_str(), nameStr.c_str());
-            if (res != 0)
-            {
-                Log::warn("Failed to backup old FRIK.ini file to '%s'. Error: %d", nameStr.c_str(), res);
+            if (res != 0) {
+                logger::warn("Failed to backup old FRIK.ini file to '{}'. Error: {}", nameStr.c_str(), res);
             }
 
             // save the new ini file
             rc = newIni.SaveFile(_iniFilePath.c_str());
-            if (rc < 0)
-            {
+            if (rc < 0) {
                 throw std::runtime_error("Failed to save post update FRIK.ini file! Error: " + std::to_string(rc));
             }
 
-            Log::info("FRIK.ini updated successfully");
+            logger::info("FRIK.ini updated successfully");
         }
 
         /**
@@ -418,17 +384,15 @@ namespace common
          */
         void startIniConfigFileWatch()
         {
-            if (_iniConfigFileWatch)
-            {
+            if (_iniConfigFileWatch) {
                 return;
             }
             // use thread as otherwise there is a deadlock
             std::thread([this]() {
-                Log::info("Start file watch in INI config '%s'", _iniFilePath.c_str());
+                logger::info("Start file watch in INI config '{}'", _iniFilePath.c_str());
                 _iniConfigFileWatch = std::make_unique<filewatch::FileWatch<std::string>>(
                     _iniFilePath, [this](const std::string&, const filewatch::Event changeType) {
-                        if (changeType != filewatch::Event::modified)
-                        {
+                        if (changeType != filewatch::Event::modified) {
                             return;
                         }
 
@@ -438,31 +402,28 @@ namespace common
                         auto prevWriteTime = _lastIniFileWriteTime.load();
                         std::error_code ec;
                         const auto writeTime = fs::last_write_time(_iniFilePath, ec);
-                        if (ec || !_lastIniFileWriteTime.compare_exchange_strong(prevWriteTime, writeTime) || writeTime - prevWriteTime < delay)
-                        {
-                            Log::verbose("Ignore INI config change duplicate (write: %lld) (err:%d)", writeTime.time_since_epoch(), ec.value());
+                        if (ec || !_lastIniFileWriteTime.compare_exchange_strong(prevWriteTime, writeTime) || writeTime - prevWriteTime < delay) {
+                            logger::debug("Ignore INI config change duplicate (write: {}) (err:{})", writeTime.time_since_epoch().count(), ec.value());
                             return;
                         }
 
                         // ignore file modified if we who modified it
                         bool expected = true;
-                        if (_ignoreNextIniFileChange.compare_exchange_strong(expected, false))
-                        {
-                            Log::verbose("Ignoring INI config change by ignore flag");
+                        if (_ignoreNextIniFileChange.compare_exchange_strong(expected, false)) {
+                            logger::debug("Ignoring INI config change by ignore flag");
                             return;
                         }
 
                         // wait until delay time is passed since the LAST file write time to prevent file lock issues and rapid modifications
                         auto now = fs::file_time_type::clock::now();
                         auto lastEventTime = _lastIniFileWriteTime.load();
-                        while (now - lastEventTime < delay)
-                        {
+                        while (now - lastEventTime < delay) {
                             std::this_thread::sleep_for(max(std::chrono::milliseconds(0), delay - (now - lastEventTime)));
                             now = fs::file_time_type::clock::now();
                             lastEventTime = _lastIniFileWriteTime.load();
                         }
 
-                        Log::info("INI config change detected (%lld), reload...", writeTime.time_since_epoch());
+                        logger::info("INI config change detected ({}), reload...", writeTime.time_since_epoch().count());
                         loadIniConfigValues();
                     });
             }).detach();
