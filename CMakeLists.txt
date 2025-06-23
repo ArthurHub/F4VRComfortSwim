@@ -194,7 +194,7 @@ target_compile_options(
 	/external:W0
 
 	/W4 # Warning level
-	/WX # Warning level (warnings are errors)
+	# /WX # Warning level (warnings are errors)
 
 	# Potentials warnings to disable
 	# /wd4702

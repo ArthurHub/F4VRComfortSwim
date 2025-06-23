@@ -1,5 +1,3 @@
-#include <spdlog/sinks/rotating_file_sink.h>
-
 #include "common/Logger.h"
 
 using namespace common;
@@ -10,7 +8,7 @@ namespace
     {
         const auto game = REL::Module::IsVR() ? "Fallout4VR" : "Fallout4";
         const auto runtimeVer = REL::Module::get().version();
-        Log::info("Starting '{}' v{} ; {} v{} ; {} at {}"sv,
+        Log::info("Starting '{}' v{} ; {} v{} ; {} at {}",
             Version::PROJECT, Version::NAME, game, runtimeVer.string(), __DATE__, __TIME__);
     }
 }
@@ -30,7 +28,7 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
     const auto ver = a_skse->RuntimeVersion();
     if (ver < (REL::Module::IsF4() ? F4SE::RUNTIME_LATEST : F4SE::RUNTIME_LATEST_VR))
     {
-        Log::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
+        Log::critical("Unsupported runtime version {}", ver.string());
         return false;
     }
 

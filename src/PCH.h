@@ -2,10 +2,10 @@
 
 #define NOMMNOSOUND
 
-#include <REL/Relocation.h>
-
 #include "F4SE/F4SE.h"
 #include "RE/Fallout.h"
+
+#include <REL/Relocation.h>
 
 using namespace std::literals;
 
