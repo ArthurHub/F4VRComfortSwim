@@ -31,23 +31,23 @@ namespace fs = std::filesystem;
 namespace
 {
     /**
-         * Global logger instance
-         */
+     * Global logger instance
+     */
     std::shared_ptr<spdlog::logger> _logger;
 
     /**
-         * Current log level
-         */
+     * Current log level
+     */
     int _logLevel = -1;
 
     /**
-         * Holds the last time of a log message per key.
-         */
+     * Holds the last time of a log message per key.
+     */
     std::unordered_map<std::string, std::chrono::steady_clock::time_point> _sampleMessagesTtl;
 
     /**
-         * Same as calling _MESSAGE but only one message log per "time" second, other logs are dropped.
-         */
+     * Same as calling _MESSAGE but only one message log per "time" second, other logs are dropped.
+     */
     template <class... Args>
     void sampleImpl(const int time, const std::source_location& loc, spdlog::format_string_t<Args...> fmt, Args&&... args)
     {
@@ -72,15 +72,16 @@ namespace common::logger
     MAKE_SOURCE_LOGGER(critical, critical);
 
     /**
-         * Same as calling info() but only one message log per "time" in milliseconds, other logs are dropped.
-         * Use the message format as a key to identify the log messages that should be sampled.
-         */
+     * Same as calling info() but only one message log per "time" in milliseconds, other logs are dropped.
+     * Use the message format as a key to identify the log messages that should be sampled.
+     */
     template <class... Args>
     struct [[maybe_unused]] sample
     {
         sample() = delete;
 
-        explicit sample(spdlog::format_string_t<Args...> fmt, Args&&... args, const std::source_location& loc = std::source_location::current())
+        explicit sample(spdlog::format_string_t<Args...> fmt, Args&&... args,
+            const std::source_location& loc = std::source_location::current())
         {
             sampleImpl(1000, loc, fmt, std::forward<Args>(args)...);
         }
@@ -90,14 +91,13 @@ namespace common::logger
     sample(spdlog::format_string_t<Args...>, Args&&...) -> sample<Args...>;
 
     /**
-        * Init logging using a log with the given name put in "My Games" folder.
-         */
+     * Init logging using a log with the given name put in "My Games" folder.
+     */
     inline void init(const std::string_view& logFileName)
     {
         auto path = F4SE::log::log_directory();
         const auto gamepath = REL::Module::IsVR() ? "Fallout4VR/F4SE" : "Fallout4/F4SE";
-        if (!path.value().generic_string().ends_with(gamepath))
-        {
+        if (!path.value().generic_string().ends_with(gamepath)) {
             // handle bug where game directory is missing
             path = path.value().parent_path().append(gamepath);
         }
@@ -119,8 +119,8 @@ namespace common::logger
     }
 
     /**
-         * Update the global logger log level based on the config setting.
-         */
+     * Update the global logger log level based on the config setting.
+     */
     inline void setLogLevel(int logLevel)
     {
         if (_logLevel == logLevel)

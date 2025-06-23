@@ -41,11 +41,11 @@ endif()
 set_from_environment(CommonLibF4Path)
 find_path(CommonLibF4PathLocal
 	CommonLibF4/include/REL/Relocation.h
-	PATHS 
-	  ${CommonLibF4Path}  
-	  CommonLibF4 
+	PATHS
+	  ${CommonLibF4Path}
+	  CommonLibF4
 	  external/CommonLibF4
-	  ../CommonLibF4 
+	  ../CommonLibF4
 )
 if(${CommonLibF4PathLocal} STREQUAL "CommonLibF4PathLocal-NOTFOUND")
 	message(FATAL_ERROR ">> CommonLibF4 Path not found! didn't init git modules? or not set CommonLibF4Path env variable?")
@@ -65,7 +65,7 @@ message(">>> Using CommonLibF4: '${CommonLibF4PathLocal}'")
 # >>> Set build flags
 # Suppresses Microsoft's "unsafe function" warnings (like strcpy, sprintf, etc.) in MSVC.
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-# Optimizations 
+# Optimizations
 set(Boost_USE_STATIC_RUNTIME OFF CACHE BOOL "")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
