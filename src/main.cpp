@@ -8,7 +8,7 @@ namespace
     {
         const auto game = REL::Module::IsVR() ? "Fallout4VR" : "Fallout4";
         const auto runtimeVer = REL::Module::get().version();
-        Log::info("Starting '{}' v{} ; {} v{} ; {} at {}",
+        logger::info("Starting '{}' v{} ; {} v{} ; {} at {}",
             Version::PROJECT, Version::NAME, game, runtimeVer.string(), __DATE__, __TIME__);
     }
 }
@@ -21,14 +21,14 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 
     if (a_skse->IsEditor())
     {
-        Log::critical("Loaded in editor, marking as incompatible");
+        logger::critical("Loaded in editor, marking as incompatible");
         return false;
     }
 
     const auto ver = a_skse->RuntimeVersion();
     if (ver < (REL::Module::IsF4() ? F4SE::RUNTIME_LATEST : F4SE::RUNTIME_LATEST_VR))
     {
-        Log::critical("Unsupported runtime version {}", ver.string());
+        logger::critical("Unsupported runtime version {}", ver.string());
         return false;
     }
 
@@ -37,7 +37,7 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
-    Log::init(Version::PROJECT);
+    logger::init(Version::PROJECT);
 
     logPluginGameStart();
 
