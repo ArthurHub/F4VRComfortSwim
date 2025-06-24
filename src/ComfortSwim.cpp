@@ -1,6 +1,7 @@
 #include "ComfortSwim.h"
 
 #include "Config.h"
+#include "Hooks.h"
 
 using namespace common;
 
@@ -10,7 +11,7 @@ namespace comfort_swim
     {
         switch (message->type) {
         case F4SE::MessagingInterface::kGameLoaded:
-            logger::info("Game loaded - starting swimming state monitoring");
+            logger::info("Game loaded");
             break;
         default: ;
         }
@@ -25,13 +26,15 @@ namespace comfort_swim
         if (!messaging || !messaging->RegisterListener(onF4SEMessageHandler)) {
             throw std::runtime_error("Failed to register message handler.");
         }
+
+        hooks::init();
     }
 
-    void ComfortSwim::testing()
+    void ComfortSwim::onFrameUpdate()
     {
         auto player = RE::PlayerCharacter::GetSingleton();
         if (!player || !player->loadedData) {
-            logger::sample(3000, "no player data yet");
+            logger::sample(3000, "no player data - noop");
             return;
         }
 
@@ -44,8 +47,9 @@ namespace comfort_swim
 
         // moving?
         auto pos = player->GetPosition();
-        pos.x += 5; // just to test
-        pos.y += 5; // just to test
+        pos.x += 1;
+        pos.y += 1;
+        pos.z += 1;
         player->SetPosition(pos, true);
 
         // crashes:

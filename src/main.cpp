@@ -10,8 +10,8 @@ namespace
     {
         const auto game = REL::Module::IsVR() ? "Fallout4VR" : "Fallout4";
         const auto runtimeVer = REL::Module::get().version();
-        logger::info("Starting '{}' v{} ; {} v{} ; {} at {}",
-            Version::PROJECT, Version::NAME, game, runtimeVer.string(), __DATE__, __TIME__);
+        logger::info("Starting '{}' v{} ; {} v{} ; {} at {} ; BaseAddress: 0x{:X}",
+            Version::PROJECT, Version::NAME, game, runtimeVer.string(), __DATE__, __TIME__, REL::Module::get().base());
     }
 }
 
@@ -43,7 +43,7 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f
 
         F4SE::Init(a_f4se, false);
 
-        comfort_swim::g_comfortSwim.init();
+        comfort_swim::ComfortSwim::init();
 
         return true;
     } catch (const std::exception& ex) {

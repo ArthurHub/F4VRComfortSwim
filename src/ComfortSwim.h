@@ -6,9 +6,9 @@ namespace comfort_swim
     {
     public:
         static void init();
+        static void onFrameUpdate();
 
     private:
-        static void testing();
     };
 
     // The ONE global to rule them ALL
