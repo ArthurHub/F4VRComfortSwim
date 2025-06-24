@@ -43,22 +43,24 @@ namespace common::logger::internal
     /**
      * Holds the last time of a log message per key.
      */
-    inline std::unordered_map<std::string, std::chrono::steady_clock::time_point> _sampleMessagesTtl;
+    inline std::unordered_map<std::string_view, std::chrono::steady_clock::time_point> _sampleMessagesTtl;
 
     /**
      * Same as calling _MESSAGE but only one message log per "time" second, other logs are dropped.
      */
     template <class... Args>
-    void sampleImpl(const int time, const std::source_location& loc, spdlog::format_string_t<Args...> fmt, Args&&... args)
+    void sampleImpl(const int time, spdlog::format_string_t<Args...> fmt, Args&&... args)
     {
-        const auto key = fmt;
+        const fmt::basic_string_view<char> fmtView = fmt;
+        const std::string_view key(fmtView.data(), fmtView.size());
+
         const auto now = std::chrono::steady_clock::now();
         if (_sampleMessagesTtl.contains(key) && now - _sampleMessagesTtl[key] <= std::chrono::milliseconds(time))
             return;
 
         _sampleMessagesTtl[key] = now;
-        spdlog::source_loc sourceLoc{ loc.file_name(), static_cast<int>(loc.line()), loc.function_name() };
-        _logger->log(sourceLoc, spdlog::level::info, " [SAMPLE] " + fmt, std::forward<Args>(args)...);
+        std::string formatted = fmt::format(fmt, std::forward<Args>(args)...);
+        _logger->log(spdlog::level::info, "[SAMPLE] {}", formatted);
     }
 }
 
@@ -76,19 +78,16 @@ namespace common::logger
      * Use the message format as a key to identify the log messages that should be sampled.
      */
     template <class... Args>
-    struct [[maybe_unused]] sample
+    void sample(spdlog::format_string_t<Args...> fmt, Args&&... args)
     {
-        sample() = delete;
-
-        explicit sample(spdlog::format_string_t<Args...> fmt, Args&&... args,
-            const std::source_location& loc = std::source_location::current())
-        {
-            sampleImpl(1000, loc, fmt, std::forward<Args>(args)...);
-        }
-    };
+        internal::sampleImpl(1000, fmt, std::forward<Args>(args)...);
+    }
 
     template <class... Args>
-    sample(spdlog::format_string_t<Args...>, Args&&...) -> sample<Args...>;
+    void sample(const int time, spdlog::format_string_t<Args...> fmt, Args&&... args)
+    {
+        internal::sampleImpl(time, fmt, std::forward<Args>(args)...);
+    }
 
     /**
      * Init logging using a log with the given name put in "My Games" folder.
