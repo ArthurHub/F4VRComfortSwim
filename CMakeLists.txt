@@ -159,12 +159,14 @@ target_include_directories(
 	${BUILD_DIR}/include
 	${SOURCE_DIR}
 	${CommonLibF4PathLocal}/CommonLibF4/include
+	${ROOT_DIR}/external/openvr
 )
 # Libraries (.lib) to link
 target_link_libraries(
 	${PROJECT_NAME}
 	PRIVATE
 	CommonLibF4::CommonLibF4
+	${ROOT_DIR}/external/openvr/openvr_api.lib
 )
 # Add precompiled header (PCH.h)
 target_precompile_headers(
