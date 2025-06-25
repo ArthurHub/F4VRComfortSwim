@@ -2,5 +2,6 @@
 
 namespace f4vr
 {
-    inline REL::Relocation<bool> iniLeftHandedMode{ REL::Offset(0x37d5e48) }; // location of bLeftHandedMode:VR ini setting
+    // not sure why RE::Relocation doesn't work here, so using raw address
+    inline auto iniLeftHandedMode = reinterpret_cast<bool*>(REL::Offset(0x37d5e48).address());
 }

@@ -8,29 +8,16 @@ using namespace common;
 
 namespace comfort_swim
 {
-    void F4SEAPI onF4SEMessageHandler(F4SE::MessagingInterface::Message* message)
-    {
-        switch (message->type) {
-        case F4SE::MessagingInterface::kGameLoaded:
-            logger::info("Game loaded");
-            break;
-        default: ;
-        }
-    }
-
     void ComfortSwim::init()
     {
         logger::info("ComfortSwim init...");
         g_config.load();
-
-        const auto messaging = F4SE::GetMessagingInterface();
-        if (!messaging || !messaging->RegisterListener(onF4SEMessageHandler)) {
-            throw std::runtime_error("Failed to register message handler.");
-        }
-
         hooks::init();
     }
 
+    /**
+     * On every frame if player is initialized, swimming, and has input, do comfort swimming.
+     */
     void ComfortSwim::onFrameUpdate()
     {
         f4vr::VRControllers.update();
@@ -41,35 +28,44 @@ namespace comfort_swim
             return;
         }
 
-        // logger::sample("player sneak?({}) - jumping?({}) - Location?({})", player->IsSneaking(), player->IsJumping(), player->DoGetMovementHeight());
-        logger::sample("Underwater?: CharacterState({}) underWaterTimer({}) leftHanded?({})",
-            static_cast<int>(player->DoGetCharacterState()), player->underWaterTimer, f4vr::isLeftHandedMode());
-
-        logger::sample("Player Location: ({}, {}, {}) ({}, {})",
-            player->data.location.x, player->data.location.y, player->data.location.z,
-            player->GetPosition().x, player->GetPosition().y);
-
-        const auto offhandAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Primary);
-        const auto primaryAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Offhand);
-
-        if (fEqual(player->underWaterTimer, 0)) {
-            logger::sample("not underwater - noop");
+        if (!f4vr::isSwimming(player)) {
             return;
         }
 
-        if (fEqual(offhandAxisValue.x, 0) && fEqual(offhandAxisValue.y, 0) && fEqual(primaryAxisValue.y, 0)) {
-            logger::sample("no movement - noop");
-            return;
-        }
+        const auto primaryAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Primary);
+        const auto offhandAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Offhand);
 
-        // moving?
+        if (fNotEqual(offhandAxisValue.x, 0) || fNotEqual(offhandAxisValue.y, 0) || fNotEqual(primaryAxisValue.y, 0)) {
+            doSwimming(player, primaryAxisValue, offhandAxisValue);
+        }
+    }
+
+    /**
+     * Calculate the new player position based on swimming input and heading.
+     */
+    void ComfortSwim::doSwimming(RE::PlayerCharacter* const player, const vr::VRControllerAxis_t primaryAxisValue, const vr::VRControllerAxis_t offhandAxisValue)
+    {
+        auto const heading = player->GetHeading();
+
+        // Calculate movement in the player's local space and rotate by heading
+        const float cosAngle = std::cos(heading);
+        const float sinAngle = std::sin(heading);
+
+        // Offhand axis controls X (strafe) and Y (forward/back) in controller space
+        const float controllerX = offhandAxisValue.x;
+        const float controllerY = offhandAxisValue.y;
+        const float deltaX = controllerX * cosAngle + controllerY * sinAngle;
+        const float deltaY = -controllerX * sinAngle + controllerY * cosAngle;
+
         auto pos = player->GetPosition();
-        pos.x += 3 * offhandAxisValue.x;
-        pos.y += 3 * offhandAxisValue.y;
-        pos.z += 2 * primaryAxisValue.y;
-        player->SetPosition(pos, true);
+        if (f4vr::isUnderwater(player)) {
+            pos.x += 2 * deltaX;
+            pos.y += 2 * deltaY;
+            pos.z += 1.5f * primaryAxisValue.y;
+        } else if (primaryAxisValue.y < 0) {
+            // TODO: handle diving better
+        }
 
-        // crashes:
-        // player->Move(0.1, RE::NiPoint3(1, 1, 1), 0.1);
+        player->SetPosition(pos, true);
     }
 }
