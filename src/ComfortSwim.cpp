@@ -42,9 +42,12 @@ namespace comfort_swim
         }
 
         if (f4vr::isUnderwater(player)) {
-            const RE::NiPoint3 deltaPos = { 3 * offhandAxisValue.x, 3 * offhandAxisValue.y, 1.5f * primaryAxisValue.y };
-            logger::debug("Underwater movement by: ({}, {}, {})", deltaPos.x, deltaPos.y, deltaPos.z);
-            player->Move(0.1f, deltaPos, false);
+            const float dx = offhandAxisValue.x * g_config.strafeSwimmingSpeedMultiplier;
+            const float dy = offhandAxisValue.y * (offhandAxisValue.y > 0 ? g_config.forwardSwimmingSpeedMultiplier : g_config.backwardSwimmingSpeedMultiplier);
+            const float dz = primaryAxisValue.y * (primaryAxisValue.y > 0 ? g_config.upSwimmingSpeedMultiplier : g_config.downSwimmingSpeedMultiplier);
+
+            logger::trace("Underwater movement by: ({:.4f}, {:.4f}, {:.4f})", dx, dy, dz);
+            player->Move(0.1f, { dx, dy, dz }, false);
         } else if (primaryAxisValue.y < 0) {
             // TODO: handle diving better
         }
