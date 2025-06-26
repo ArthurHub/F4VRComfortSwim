@@ -7,10 +7,14 @@ namespace comfort_swim
     {
     public:
         static void init();
-        static void onFrameUpdate();
+        void onFrameUpdate();
 
     private:
-        static void doSwimming(RE::PlayerCharacter* player, vr::VRControllerAxis_t primaryAxisValue, vr::VRControllerAxis_t offhandAxisValue);
+        bool fixDiveDeepBug(RE::PlayerCharacter* player);
+
+        // used to fix diving throws the player super deep underwater
+        bool _isPlayerUnderwater = false;
+        float _lastPlayerPositionZ;
     };
 
     // The ONE global to rule them ALL
