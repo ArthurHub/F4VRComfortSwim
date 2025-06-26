@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.23)
 
 # >>> Project
 set(NAME "F4VRComfortSwim")
+set(FRIENDLY_NAME "Comfort Swim VR")
 set(VERSION 0.1.0)
 
 
@@ -266,6 +267,7 @@ add_custom_command(
   TARGET ${PROJECT_NAME}
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -DPROJECT_NAME=${PROJECT_NAME}
+						   -DPROJECT_FRIENDLY_NAME=${FRIENDLY_NAME}
 						   -DPROJECT_VERSION=${PROJECT_VERSION}
                            -DROOT_DIR=${ROOT_DIR}
                            -DBUILD_DIR=${BUILD_DIR}

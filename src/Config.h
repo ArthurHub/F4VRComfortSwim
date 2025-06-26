@@ -16,7 +16,7 @@ namespace comfort_swim
         explicit Config() :
             ConfigBase(INI_PATH, IDR_CONFIG_INI, INI_VERSION) {}
 
-        void load();
+        virtual void load() override;
 
         // swimming speed multipliers for different directions
         float forwardSwimmingSpeedMultiplier = 0;
@@ -25,9 +25,11 @@ namespace comfort_swim
         float upSwimmingSpeedMultiplier = 0;
         float downSwimmingSpeedMultiplier = 0;
 
+        // if to run the diving bug fix flow
+        bool divingBugFixEnabled = false;
+
     protected:
         virtual void loadIniConfigInternal(const CSimpleIniA& ini) override;
-        virtual void saveIniConfigInternal(CSimpleIniA& ini) const override;
     };
 
     // Global singleton for easy access

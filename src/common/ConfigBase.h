@@ -19,12 +19,14 @@ namespace common
     class ConfigBase
     {
     public:
-        ConfigBase(std::string iniFilePath, const WORD iniDefaultConfigEmbeddedResourceId, const int latestVersion) :
-            _iniFilePath(std::move(iniFilePath)),
+        ConfigBase(const std::string_view& iniFilePath, const WORD iniDefaultConfigEmbeddedResourceId, const int latestVersion) :
+            _iniFilePath(iniFilePath),
             _iniDefaultConfigEmbeddedResourceId(iniDefaultConfigEmbeddedResourceId),
             _iniConfigLatestVersion(latestVersion) {}
 
         virtual ~ConfigBase() = default;
+
+        virtual void load() = 0;
 
         // Can be used to test things at runtime during development
         // i.e. check "debugFlowFlag==1" somewhere in code and use config reload to change the value at runtime.
@@ -61,7 +63,7 @@ namespace common
         /**
          * Override to save your config values
          */
-        virtual void saveIniConfigInternal(CSimpleIniA& ini) const = 0;
+        virtual void saveIniConfigInternal(CSimpleIniA& ini) {}
 
         /**
          * Load all INI config values.
@@ -70,7 +72,7 @@ namespace common
          */
         void initIniConfig()
         {
-            // create FRIK.ini if it doesn't exist
+            // create .ini if it doesn't exist
             createFileFromResourceIfNotExists(_iniFilePath, _iniDefaultConfigEmbeddedResourceId, true);
 
             loadIniConfigValues();
@@ -132,14 +134,14 @@ namespace common
             _ignoreNextIniFileChange.store(true);
             rc = ini.SaveFile(_iniFilePath.c_str());
             if (rc < 0) {
-                logger::error("Config: Failed to save FRIK.ini. Error: {}", rc);
+                logger::error("Config: Failed to save .ini. Error: {}", rc);
             } else {
                 logger::info("Config: Saving INI config successful");
             }
         }
 
         /**
-         * Save specific key and bool value into FRIK.ini file.
+         * Save specific key and bool value into .ini file.
          */
         void saveIniConfigValue(const char* section, const char* key, const bool value)
         {
@@ -159,7 +161,7 @@ namespace common
         }
 
         /**
-         * Save specific key and double value into FRIK.ini file.
+         * Save specific key and double value into .ini file.
          */
         void saveIniConfigValue(const char* section, const char* key, const float value)
         {
@@ -179,7 +181,7 @@ namespace common
         }
 
         /**
-         * Save specific key and string value into FRIK.ini file.
+         * Save specific key and string value into .ini file.
          */
         void saveIniConfigValue(const char* section, const char* key, const char* value)
         {
@@ -308,9 +310,9 @@ namespace common
         }
 
         /**
-         * Current FRIK.ini file is older. Need to update it by:
-         * 1. Overriding the file with the default FRIK.ini resource.
-         * 2. Saving the current config values read from previous FRIK.ini to the new FRIK.ini file.
+         * Current .ini file is older. Need to update it by:
+         * 1. Overriding the file with the default .ini resource.
+         * 2. Saving the current config values read from previous .ini to the new .ini file.
          * This preserves the user changed values, including new values and comments, and remove old values completely.
          * A backup of the previous file is created with the version number for safety.
          */
@@ -319,17 +321,17 @@ namespace common
             CSimpleIniA oldIni;
             SI_Error rc = oldIni.LoadFile(_iniFilePath.c_str());
             if (rc < 0) {
-                throw std::runtime_error("Failed to load old FRIK.ini file! Error: " + std::to_string(rc));
+                throw std::runtime_error("Failed to load old .ini file! Error: " + std::to_string(rc));
             }
 
-            // override the file with the default FRIK.ini resource.
+            // override the file with the default .ini resource.
             const auto tmpIniPath = std::string(_iniFilePath) + ".tmp";
             createFileFromResourceIfNotExists(tmpIniPath, _iniDefaultConfigEmbeddedResourceId, true);
 
             CSimpleIniA newIni;
             rc = newIni.LoadFile(tmpIniPath.c_str());
             if (rc < 0) {
-                throw std::runtime_error("Failed to load new FRIK.ini file! Error: " + std::to_string(rc));
+                throw std::runtime_error("Failed to load new .ini file! Error: " + std::to_string(rc));
             }
 
             // remove temp ini file
@@ -364,16 +366,16 @@ namespace common
             nameStr = nameStr.replace(nameStr.length() - 4, 4, "_bkp_v" + std::to_string(_iniConfigVersion) + ".ini");
             res = std::rename(_iniFilePath.c_str(), nameStr.c_str());
             if (res != 0) {
-                logger::warn("Failed to backup old FRIK.ini file to '{}'. Error: {}", nameStr.c_str(), res);
+                logger::warn("Failed to backup old .ini file to '{}'. Error: {}", nameStr.c_str(), res);
             }
 
             // save the new ini file
             rc = newIni.SaveFile(_iniFilePath.c_str());
             if (rc < 0) {
-                throw std::runtime_error("Failed to save post update FRIK.ini file! Error: " + std::to_string(rc));
+                throw std::runtime_error("Failed to save post update .ini file! Error: " + std::to_string(rc));
             }
 
-            logger::info("FRIK.ini updated successfully");
+            logger::info(".ini updated successfully");
         }
 
         /**

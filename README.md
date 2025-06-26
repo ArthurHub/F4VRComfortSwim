@@ -14,9 +14,17 @@ TBD
 
 - [Getting Started](https://github.com/ArthurHub/F4VRComfortSwim/wiki/Dev-%E2%80%90-Getting-Started)
 
+## Support
+
+If you like my work, consider helping out.
+
+[![become a patron](https://theartofdev.wordpress.com/wp-content/uploads/2025/06/become_a_patron_button.png)](https://patreon.com/theartofdev)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G61G72WH)
+
 ## Credits
 
-Modding is built on the community.  
+Modding is built on the community.
 I couldn't do it without people public code.
 
 - rollingrock

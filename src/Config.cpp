@@ -15,12 +15,12 @@ namespace comfort_swim
 
     void Config::loadIniConfigInternal(const CSimpleIniA& ini)
     {
-        forwardSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "forwardSwimmingSpeedMultiplier", 1.0));
-        backwardSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "backwardSwimmingSpeedMultiplier", 1.0));
-        strafeSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "strafeSwimmingSpeedMultiplier", 1.0));
-        upSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "upSwimmingSpeedMultiplier", 1.0));
-        downSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "downSwimmingSpeedMultiplier", 1.0));
-    }
+        forwardSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "ForwardSwimmingSpeedMultiplier", 3.0));
+        backwardSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "BackwardSwimmingSpeedMultiplier", 1.5));
+        strafeSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "StrafeSwimmingSpeedMultiplier", 1.5));
+        upSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "UpSwimmingSpeedMultiplier", 1.6));
+        downSwimmingSpeedMultiplier = static_cast<float>(ini.GetDoubleValue(DEFAULT_SECTION, "DownSwimmingSpeedMultiplier", 1.2));
 
-    void Config::saveIniConfigInternal(CSimpleIniA& ini) const {}
+        divingBugFixEnabled = ini.GetBoolValue(DEFAULT_SECTION, "DivingBugFixEnabled", true);
+    }
 }

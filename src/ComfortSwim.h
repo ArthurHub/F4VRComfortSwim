@@ -1,5 +1,4 @@
 #pragma once
-#include <openvr.h>
 
 namespace comfort_swim
 {
@@ -14,7 +13,7 @@ namespace comfort_swim
 
         // used to fix diving throws the player super deep underwater
         bool _isPlayerUnderwater = false;
-        float _lastPlayerPositionZ;
+        float _lastPlayerPositionZ = 0;
     };
 
     // The ONE global to rule them ALL

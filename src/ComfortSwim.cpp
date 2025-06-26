@@ -34,7 +34,12 @@ namespace comfort_swim
             return;
         }
 
-        if (fixDiveDeepBug(player)) {
+        if (g_config.divingBugFixEnabled && fixDiveDeepBug(player)) {
+            logger::trace("dive fix applied - noop");
+            return;
+        }
+
+        if (!f4vr::isUnderwater(player)) {
             logger::trace("not underwater or dive fix - noop");
             return;
         }
@@ -65,7 +70,7 @@ namespace comfort_swim
         if (!f4vr::isUnderwater(player)) {
             _isPlayerUnderwater = false;
             _lastPlayerPositionZ = player->GetPositionZ();
-            return true;
+            return false;
         }
 
         if (_isPlayerUnderwater) {
