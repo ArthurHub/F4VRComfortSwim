@@ -52,9 +52,15 @@ namespace comfort_swim
             return;
         }
 
-        const float dx = offhandAxisValue.x * g_config.strafeSwimmingSpeedMultiplier;
-        const float dy = offhandAxisValue.y * (offhandAxisValue.y > 0 ? g_config.forwardSwimmingSpeedMultiplier : g_config.backwardSwimmingSpeedMultiplier);
+        // Get raw controller input and apply speed multipliers
+        float dx = offhandAxisValue.x * g_config.strafeSwimmingSpeedMultiplier;
+        float dy = offhandAxisValue.y * (offhandAxisValue.y > 0 ? g_config.forwardSwimmingSpeedMultiplier : g_config.backwardSwimmingSpeedMultiplier);
         const float dz = primaryAxisValue.y * (primaryAxisValue.y > 0 ? g_config.upSwimmingSpeedMultiplier : g_config.downSwimmingSpeedMultiplier);
+
+        // if (f4vr::useWandDirectionalMovement()) {
+        // Transform controller input based on controller heading relative to player
+        adjustDeltasForWandDirectionalMovement(player, dx, dy);
+        // }
 
         logger::debug("Underwater movement by: ({:.4f}, {:.4f}, {:.4f})", dx, dy, dz);
         player->Move(0.1f, { dx, dy, dz }, false);
@@ -88,5 +94,27 @@ namespace comfort_swim
         player->SetPosition(pos, true);
         _lastPlayerPositionZ -= 0.5f;
         return true;
+    }
+
+    /**
+     * Transforms raw controller input based on controller orientation relative to HMD.
+     * Uses the relative angle between controller and HMD to modify movement deltas.
+     * Details:
+     * "player->Move" function adjusts the movement deltas by the heading of the HMD.
+     * If the game is configured to use wand directional movement, we need to do the manual work to adjust
+     * the deltas based on the controller's relative heading to the HMD. So when the game applies
+     * it's adjustment it will be correct.
+     * P.S. I didn't find in game RE where to do movement based on wand movement so Had to implement it here.
+     */
+    void ComfortSwim::adjustDeltasForWandDirectionalMovement(const RE::PlayerCharacter* player, float& dx, float& dy)
+    {
+        const float controllerRelativeHeading = f4vr::VRControllers.getControllerRelativeHeading(f4vr::Hand::Offhand);
+        const float cosRelative = std::cos(controllerRelativeHeading);
+        const float sinRelative = std::sin(controllerRelativeHeading);
+
+        const float orgDx = dx;
+        const float orgDy = dy;
+        dx = orgDx * cosRelative - orgDy * sinRelative;
+        dy = orgDx * sinRelative + orgDy * cosRelative;
     }
 }

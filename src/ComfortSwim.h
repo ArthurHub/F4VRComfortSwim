@@ -10,6 +10,7 @@ namespace comfort_swim
 
     private:
         bool fixDiveDeepBug(RE::PlayerCharacter* player);
+        static void adjustDeltasForWandDirectionalMovement(const RE::PlayerCharacter* player, float& dx, float& dy);
 
         // used to fix diving throws the player super deep underwater
         bool _isPlayerUnderwater = false;

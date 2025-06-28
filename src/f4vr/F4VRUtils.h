@@ -1,7 +1,5 @@
 #pragma once
 
-#include "F4VROffsets.h"
-
 namespace f4vr
 {
     /**
@@ -10,7 +8,19 @@ namespace f4vr
      */
     inline bool isLeftHandedMode()
     {
+        // not sure why RE::Relocation doesn't work here, so using raw address
+        static auto iniLeftHandedMode = reinterpret_cast<bool*>(REL::Offset(0x37d5e48).address());
         return *iniLeftHandedMode;
+    }
+
+    /**
+     * Get the "bUseWandDirectionalMovement" setting from the INI file.
+     */
+    inline bool useWandDirectionalMovement()
+    {
+        // TODO: fix this!
+        static auto iniUseWandDirectionalMovement = reinterpret_cast<bool*>(REL::Offset(0x37D6178).address());
+        return *iniUseWandDirectionalMovement;
     }
 
     /**
