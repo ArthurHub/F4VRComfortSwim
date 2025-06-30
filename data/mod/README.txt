@@ -1,5 +1,5 @@
-Nexus: 
-https://www.nexusmods.com/fallout4/mods/???
+Nexus:
+https://www.nexusmods.com/fallout4/mods/94647
 
 Source Code:
 https://github.com/ArthurHub/F4VRComfortSwim
@@ -8,7 +8,7 @@ Wiki:
 https://github.com/ArthurHub/F4VRComfortSwim/wiki
 
 Discussion / Bug Reports:
-https://www.nexusmods.com/fallout4/mods/53464?tab=posts
+https://www.nexusmods.com/fallout4/mods/94647?tab=posts
 or
 https://github.com/ArthurHub/F4VRComfortSwim/issues
 

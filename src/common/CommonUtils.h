@@ -30,6 +30,8 @@ namespace common
     void waitForDebugger();
     uint64_t nowMillis();
     std::string toStringWithPrecision(double value, int precision = 2);
+    std::string toDateTimeString(std::filesystem::file_time_type time, const std::string& format = "%Y-%m-%d %H:%M:%S");
+    std::string toDateTimeString(std::chrono::system_clock::time_point time, const std::string& format = "%Y-%m-%d %H:%M:%S");
     std::string getCurrentTimeString();
     std::vector<std::string> loadListFromFile(const std::string& filePath);
 

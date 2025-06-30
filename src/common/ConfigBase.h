@@ -19,14 +19,21 @@ namespace common
     class ConfigBase
     {
     public:
-        ConfigBase(const std::string_view& iniFilePath, const WORD iniDefaultConfigEmbeddedResourceId, const int latestVersion) :
+        ConfigBase(const std::string_view& iniFilePath, const WORD iniDefaultConfigEmbeddedResourceId) :
             _iniFilePath(iniFilePath),
-            _iniDefaultConfigEmbeddedResourceId(iniDefaultConfigEmbeddedResourceId),
-            _iniConfigLatestVersion(latestVersion) {}
+            _iniDefaultConfigEmbeddedResourceId(iniDefaultConfigEmbeddedResourceId) {}
 
         virtual ~ConfigBase() = default;
 
-        virtual void load() = 0;
+        /**
+         * Load the config from the INI file.
+         */
+        virtual void load()
+        {
+            logger::info("Load ini config...");
+            createDirDeep(_iniFilePath);
+            initIniConfig();
+        }
 
         // Can be used to test things at runtime during development
         // i.e. check "debugFlowFlag==1" somewhere in code and use config reload to change the value at runtime.
@@ -77,15 +84,33 @@ namespace common
 
             loadIniConfigValues();
 
-            if (_iniConfigVersion < _iniConfigLatestVersion) {
-                logger::info("Updating INI config version {} -> {}", _iniConfigVersion, _iniConfigLatestVersion);
-                updateIniConfigToLatestVersion();
+            const auto iniConfigLatestVersion = loadEmbeddedResourceIniConfigVersion();
+            if (_iniConfigVersion < iniConfigLatestVersion) {
+                logger::info("Updating INI config version {} -> {}", _iniConfigVersion, iniConfigLatestVersion);
+                updateIniConfigToLatestVersion(iniConfigLatestVersion);
 
                 // reload the config after update
                 loadIniConfigValues();
             }
 
             startIniConfigFileWatch();
+        }
+
+        /**
+         * Get the latest version of the embedded INI config resource to know if update migration is required.
+         */
+        int loadEmbeddedResourceIniConfigVersion() const
+        {
+            const auto embeddedIniStr = getEmbededResourceAsString(_iniDefaultConfigEmbeddedResourceId);
+
+            CSimpleIniA ini;
+            const SI_Error rc = ini.LoadData(embeddedIniStr);
+            if (rc < 0) {
+                logger::warn("Failed to load INI config file! Error:", rc);
+                throw std::runtime_error("Failed to load INI config file! Error: " + std::to_string(rc));
+            }
+
+            return ini.GetLongValue(INI_SECTION_DEBUG, "iVersion", 0);
         }
 
         /**
@@ -101,12 +126,12 @@ namespace common
                 throw std::runtime_error("Failed to load INI config file! Error: " + std::to_string(rc));
             }
 
-            _iniConfigVersion = ini.GetLongValue(INI_SECTION_DEBUG, "Version", 0);
-            _logLevel = ini.GetLongValue(INI_SECTION_DEBUG, "LogLevel", 3);
-            debugFlowFlag1 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "DebugFlowFlag1", 0));
-            debugFlowFlag2 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "DebugFlowFlag2", 0));
-            debugFlowFlag3 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "DebugFlowFlag3", 0));
-            _debugDumpDataOnceNames = ini.GetValue(INI_SECTION_DEBUG, "DebugDumpDataOnceNames", "");
+            _iniConfigVersion = ini.GetLongValue(INI_SECTION_DEBUG, "iVersion", 0);
+            _logLevel = ini.GetLongValue(INI_SECTION_DEBUG, "iLogLevel", 2);
+            debugFlowFlag1 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "fDebugFlowFlag1", 0));
+            debugFlowFlag2 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "fDebugFlowFlag2", 0));
+            debugFlowFlag3 = static_cast<float>(ini.GetDoubleValue(INI_SECTION_DEBUG, "fDebugFlowFlag3", 0));
+            _debugDumpDataOnceNames = ini.GetValue(INI_SECTION_DEBUG, "sDebugDumpDataOnceNames", "");
 
             // set log after loading from config
             logger::setLogLevel(_logLevel);
@@ -316,7 +341,7 @@ namespace common
          * This preserves the user changed values, including new values and comments, and remove old values completely.
          * A backup of the previous file is created with the version number for safety.
          */
-        void updateIniConfigToLatestVersion() const
+        void updateIniConfigToLatestVersion(const int iniConfigLatestVersion) const
         {
             CSimpleIniA oldIni;
             SI_Error rc = oldIni.LoadFile(_iniFilePath.c_str());
@@ -359,7 +384,7 @@ namespace common
             }
 
             // set the version to latest
-            newIni.SetLongValue(INI_SECTION_DEBUG, "Version", _iniConfigLatestVersion);
+            newIni.SetLongValue(INI_SECTION_DEBUG, "iVersion", iniConfigLatestVersion);
 
             // backup the old ini file before overwriting
             auto nameStr = std::string(_iniFilePath);
@@ -425,7 +450,7 @@ namespace common
                             lastEventTime = _lastIniFileWriteTime.load();
                         }
 
-                        logger::info("INI config change detected ({}), reload...", writeTime.time_since_epoch().count());
+                        logger::info("INI config change detected ({}), reload...", toDateTimeString(writeTime));
                         loadIniConfigValues();
                     });
             }).detach();
@@ -437,9 +462,6 @@ namespace common
 
         // resource id to use for default ini config
         WORD _iniDefaultConfigEmbeddedResourceId;
-
-        // current INI config version to handle updates
-        int _iniConfigLatestVersion;
 
         // The INI config version to handle updates/migrations
         int _iniConfigVersion = 0;

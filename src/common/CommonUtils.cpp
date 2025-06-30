@@ -234,6 +234,27 @@ namespace common
     }
 
     /**
+     * Get nice formatted date-time string from time point.
+     */
+    std::string toDateTimeString(const std::filesystem::file_time_type time, const std::string& format)
+    {
+        const auto systemTime = std::chrono::clock_cast<std::chrono::system_clock>(time);
+        return toDateTimeString(systemTime, format);
+    }
+
+    /**
+     * Get nice formatted date-time string from time point.
+     */
+    std::string toDateTimeString(const std::chrono::system_clock::time_point time, const std::string& format)
+    {
+        const std::time_t timeT = std::chrono::system_clock::to_time_t(time);
+        const std::tm tm = *std::localtime(&timeT);
+        std::ostringstream oss;
+        oss << std::put_time(&tm, format.c_str());
+        return oss.str();
+    }
+
+    /**
      * Get a simple string of the current time in HH:MM:SS format.
      */
     std::string getCurrentTimeString()
