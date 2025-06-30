@@ -9,7 +9,7 @@ namespace f4vr
     inline bool isLeftHandedMode()
     {
         // not sure why RE::Relocation doesn't work here, so using raw address
-        static auto iniLeftHandedMode = reinterpret_cast<bool*>(REL::Offset(0x37d5e48).address());
+        static auto iniLeftHandedMode = reinterpret_cast<bool*>(REL::Offset(0x37d5e48).address()); // NOLINT(performance-no-int-to-ptr)
         return *iniLeftHandedMode;
     }
 
@@ -18,8 +18,7 @@ namespace f4vr
      */
     inline bool useWandDirectionalMovement()
     {
-        // TODO: fix this!
-        static auto iniUseWandDirectionalMovement = reinterpret_cast<bool*>(REL::Offset(0x37D6178).address());
+        static auto iniUseWandDirectionalMovement = reinterpret_cast<bool*>(REL::Offset(0x37D6160).address()); // NOLINT(performance-no-int-to-ptr)
         return *iniUseWandDirectionalMovement;
     }
 
@@ -64,7 +63,7 @@ namespace f4vr
                 if (projectile && RE::CombatUtilities::CalculateProjectileLOS(player, projectile, pickData)) {
                     // If LOS calculation succeeded, check if there was a hit
                     if (pickData.HasHit()) {
-                        auto hitFraction = pickData.GetHitFraction();
+                        const auto hitFraction = pickData.GetHitFraction();
                         // If hit fraction is very close to 1.0, the collision is at the target (acceptable)
                         // If hit fraction is significantly less than 1.0, there's an obstacle in the way
                         if (hitFraction < 0.9f) {

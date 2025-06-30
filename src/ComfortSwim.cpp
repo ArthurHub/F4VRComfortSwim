@@ -57,12 +57,13 @@ namespace comfort_swim
         float dy = offhandAxisValue.y * (offhandAxisValue.y > 0 ? g_config.forwardSwimmingSpeedMultiplier : g_config.backwardSwimmingSpeedMultiplier);
         const float dz = primaryAxisValue.y * (primaryAxisValue.y > 0 ? g_config.upSwimmingSpeedMultiplier : g_config.downSwimmingSpeedMultiplier);
 
-        // if (f4vr::useWandDirectionalMovement()) {
-        // Transform controller input based on controller heading relative to player
-        adjustDeltasForWandDirectionalMovement(player, dx, dy);
-        // }
+        const bool useWandDirecMove = f4vr::useWandDirectionalMovement();
+        if (useWandDirecMove) {
+            // Transform controller input based on controller heading relative to player
+            adjustDeltasForWandDirectionalMovement(dx, dy);
+        }
 
-        logger::debug("Underwater movement by: ({:.4f}, {:.4f}, {:.4f})", dx, dy, dz);
+        logger::debug("Underwater movement by wandDirection?({}): ({:.4f}, {:.4f}, {:.4f})", useWandDirecMove, dx, dy, dz);
         player->Move(0.1f, { dx, dy, dz }, false);
     }
 
@@ -92,7 +93,7 @@ namespace comfort_swim
         logger::info("Diving fix: moving player back from {:.3f} to {:.3f}", pos.z, _lastPlayerPositionZ);
         pos.z = _lastPlayerPositionZ;
         player->SetPosition(pos, true);
-        _lastPlayerPositionZ -= 0.5f;
+        _lastPlayerPositionZ -= 0.4f;
         return true;
     }
 
@@ -106,7 +107,7 @@ namespace comfort_swim
      * it's adjustment it will be correct.
      * P.S. I didn't find in game RE where to do movement based on wand movement so Had to implement it here.
      */
-    void ComfortSwim::adjustDeltasForWandDirectionalMovement(const RE::PlayerCharacter* player, float& dx, float& dy)
+    void ComfortSwim::adjustDeltasForWandDirectionalMovement(float& dx, float& dy)
     {
         const float controllerRelativeHeading = f4vr::VRControllers.getControllerRelativeHeading(f4vr::Hand::Offhand);
         const float cosRelative = std::cos(controllerRelativeHeading);
