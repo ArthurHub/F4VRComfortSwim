@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.23)
 # >>> Project
 set(NAME "F4VRComfortSwim")
 set(FRIENDLY_NAME "Comfort Swim VR")
-set(VERSION 0.2.0)
+set(VERSION 0.3.0)
 
 
 # >>> Folders

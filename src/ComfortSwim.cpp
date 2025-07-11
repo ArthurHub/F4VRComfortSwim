@@ -12,7 +12,31 @@ namespace comfort_swim
     {
         logger::info("ComfortSwim init...");
         g_config.load();
-        hooks::init();
+
+        const auto messaging = F4SE::GetMessagingInterface();
+        messaging->RegisterListener(onF4VRSEMessage);
+    }
+
+    /**
+     * F4VRSE messages listener to handle game loaded, new game, and save loaded events.
+     */
+    void ComfortSwim::onF4VRSEMessage(F4SE::MessagingInterface::Message* msg)
+    {
+        if (!msg) {
+            return;
+        }
+
+        if (msg->type == F4SE::MessagingInterface::kGameLoaded) {
+            // One time event fired after all plugins are loaded and game is full in main menu
+            logger::info("F4VRSE On Game Loaded Message...");
+            hooks::init();
+        }
+
+        if (msg->type == F4SE::MessagingInterface::kPostLoadGame || msg->type == F4SE::MessagingInterface::kNewGame) {
+            // If a game is loaded or a new game
+            logger::info("F4VRSE On Post Load Message...");
+            hooks::validate();
+        }
     }
 
     /**

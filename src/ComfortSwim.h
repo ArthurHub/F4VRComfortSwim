@@ -9,6 +9,7 @@ namespace comfort_swim
         void onFrameUpdate();
 
     private:
+        static void onF4VRSEMessage(F4SE::MessagingInterface::Message* msg);
         bool fixDiveDeepBug(RE::PlayerCharacter* player);
         static void adjustDeltasForWandDirectionalMovement(float& dx, float& dy);
 
