@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "Hooks.h"
+#include "f4vr/F4VRUtils.h"
 #include "f4vr/VRControllersManager.h"
 
 using namespace common;
@@ -44,7 +45,7 @@ namespace comfort_swim
      */
     void ComfortSwim::onFrameUpdate()
     {
-        f4vr::VRControllers.update();
+        f4vr::VRControllers.update(f4vr::isLeftHandedMode());
 
         const auto player = RE::PlayerCharacter::GetSingleton();
         if (!player || !player->loadedData) {
@@ -68,8 +69,8 @@ namespace comfort_swim
             return;
         }
 
-        const auto primaryAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Primary);
-        const auto offhandAxisValue = f4vr::VRControllers.getAxisValue(f4vr::Hand::Offhand);
+        const auto primaryAxisValue = f4vr::VRControllers.getThumbstickValue(f4vr::Hand::Primary);
+        const auto offhandAxisValue = f4vr::VRControllers.getThumbstickValue(f4vr::Hand::Offhand);
 
         if (!fNotEqual(offhandAxisValue.x, 0) && !fNotEqual(offhandAxisValue.y, 0) && !fNotEqual(primaryAxisValue.y, 0)) {
             logger::trace("no user controllers input - noop");
