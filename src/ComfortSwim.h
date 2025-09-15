@@ -1,15 +1,24 @@
 #pragma once
 
+#include "Config.h"
+#include "ModBase.h"
+
 namespace comfort_swim
 {
-    class ComfortSwim
+    class ComfortSwim : public f4cf::ModBase
     {
     public:
-        static void init();
+        ComfortSwim() :
+            ModBase(Version::NAME, Version::PROJECT, Version::MAJOR, &g_config) {}
+
         void onFrameUpdate();
 
+    protected:
+        virtual void onModLoaded(const F4SE::LoadInterface* f4SE) override;
+        virtual void onGameLoaded() override;
+        virtual void onGameSessionLoaded() override;
+
     private:
-        static void onF4VRSEMessage(F4SE::MessagingInterface::Message* msg);
         bool fixDiveDeepBug(RE::PlayerCharacter* player);
         static void adjustDeltasForWandDirectionalMovement(float& dx, float& dy);
 

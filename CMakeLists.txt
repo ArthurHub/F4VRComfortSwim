@@ -42,9 +42,8 @@ find_path(F4VRCommonFrameworkPathFind
   PATHS
     ${F4VRCommonFrameworkPath}
     F4VRCommonFramework
-    external/F4VRCommonFramework
-    extern/F4VRCommonFramework
     ../F4VRCommonFramework
+    external/F4VRCommonFramework
 )
 if(${F4VRCommonFrameworkPathFind} STREQUAL "F4VRCommonFrameworkPathFind-NOTFOUND")
   message(FATAL_ERROR ">> F4VRCommonFramework path not found! Did you init submodules or set F4VRCommonFrameworkPath?")

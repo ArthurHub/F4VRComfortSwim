@@ -7,37 +7,33 @@
 
 using namespace common;
 
+// This is the entry point to the mod.
+extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_skse, F4SE::PluginInfo* a_info)
+{
+    return comfort_swim::g_comfortSwim.onF4SEPluginQuery(a_skse, a_info);
+}
+
+// This is the entry point to the mod.
+extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
+{
+    return comfort_swim::g_comfortSwim.onF4SEPluginLoad(a_f4se);
+}
+
 namespace comfort_swim
 {
-    void ComfortSwim::init()
+    void ComfortSwim::onModLoaded(const F4SE::LoadInterface*)
     {
-        logger::info("ComfortSwim init...");
-        g_config.load();
-
-        const auto messaging = F4SE::GetMessagingInterface();
-        messaging->RegisterListener(onF4VRSEMessage);
+        //noop
     }
 
-    /**
-     * F4VRSE messages listener to handle game loaded, new game, and save loaded events.
-     */
-    void ComfortSwim::onF4VRSEMessage(F4SE::MessagingInterface::Message* msg)
+    void ComfortSwim::onGameLoaded()
     {
-        if (!msg) {
-            return;
-        }
+        hooks::init();
+    }
 
-        if (msg->type == F4SE::MessagingInterface::kGameLoaded) {
-            // One time event fired after all plugins are loaded and game is full in main menu
-            logger::info("F4VRSE On Game Loaded Message...");
-            hooks::init();
-        }
-
-        if (msg->type == F4SE::MessagingInterface::kPostLoadGame || msg->type == F4SE::MessagingInterface::kNewGame) {
-            // If a game is loaded or a new game
-            logger::info("F4VRSE On Post Load Message...");
-            hooks::validate();
-        }
+    void ComfortSwim::onGameSessionLoaded()
+    {
+        hooks::validate();
     }
 
     /**
