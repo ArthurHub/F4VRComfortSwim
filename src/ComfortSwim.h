@@ -9,7 +9,12 @@ namespace comfort_swim
     {
     public:
         ComfortSwim() :
-            ModBase(Version::PROJECT, Version::NAME, &g_config, 32) {}
+            ModBase(Settings(
+                Version::PROJECT,
+                Version::NAME,
+                &g_config,
+                32,
+                true)) {}
 
     protected:
         virtual void onModLoaded(const F4SE::LoadInterface* f4SE) override;
