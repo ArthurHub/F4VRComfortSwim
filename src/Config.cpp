@@ -4,7 +4,7 @@ using namespace common;
 
 namespace comfort_swim
 {
-    static const auto DEFAULT_SECTION = "F4VRComfortSwim";
+    static constexpr auto DEFAULT_SECTION = std::string(Version::PROJECT).c_str();
 
     void Config::loadIniConfigInternal(const CSimpleIniA& ini)
     {

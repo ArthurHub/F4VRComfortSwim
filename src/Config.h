@@ -5,8 +5,8 @@
 
 namespace comfort_swim
 {
-    static const auto BASE_PATH = common::BASE_PATH + R"(\F4VRComfortSwim)";
-    static const auto INI_PATH = BASE_PATH + R"(\F4VRComfortSwim.ini)";
+    static const auto BASE_PATH = common::BASE_PATH + "\\" + std::string(Version::PROJECT);
+    static const auto INI_PATH = BASE_PATH + "\\" + std::string(Version::PROJECT) + ".ini";
 
     class Config : public common::ConfigBase
     {
