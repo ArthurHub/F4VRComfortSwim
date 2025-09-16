@@ -9,14 +9,13 @@ namespace comfort_swim
     {
     public:
         ComfortSwim() :
-            ModBase(Version::NAME, Version::PROJECT, Version::MAJOR, &g_config) {}
-
-        void onFrameUpdate();
+            ModBase(Version::PROJECT, Version::NAME, &g_config, 32) {}
 
     protected:
         virtual void onModLoaded(const F4SE::LoadInterface* f4SE) override;
         virtual void onGameLoaded() override;
         virtual void onGameSessionLoaded() override;
+        virtual void onFrameUpdate() override;
 
     private:
         bool fixDiveDeepBug(RE::PlayerCharacter* player);

@@ -1,7 +1,6 @@
 #include "ComfortSwim.h"
 
 #include "Config.h"
-#include "Hooks.h"
 #include "f4vr/F4VRUtils.h"
 #include "f4vr/VRControllersManager.h"
 
@@ -28,12 +27,12 @@ namespace comfort_swim
 
     void ComfortSwim::onGameLoaded()
     {
-        hooks::init();
+        //noop
     }
 
     void ComfortSwim::onGameSessionLoaded()
     {
-        hooks::validate();
+        //noop
     }
 
     /**
@@ -41,8 +40,6 @@ namespace comfort_swim
      */
     void ComfortSwim::onFrameUpdate()
     {
-        f4vr::VRControllers.update(f4vr::isLeftHandedMode());
-
         const auto player = RE::PlayerCharacter::GetSingleton();
         if (!player || !player->loadedData) {
             logger::sample(3000, "no player data - noop");

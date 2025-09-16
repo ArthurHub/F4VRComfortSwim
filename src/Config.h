@@ -12,7 +12,7 @@ namespace comfort_swim
     {
     public:
         explicit Config() :
-            ConfigBase(INI_PATH, IDR_CONFIG_INI) {}
+            ConfigBase(Version::PROJECT, INI_PATH, IDR_CONFIG_INI) {}
 
         // swimming speed multipliers for different directions
         float forwardSwimmingSpeedMultiplier = 0;
