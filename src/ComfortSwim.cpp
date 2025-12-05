@@ -2,20 +2,20 @@
 
 #include "Config.h"
 #include "f4vr/F4VRUtils.h"
-#include "f4vr/VRControllersManager.h"
+#include "vrcf/VRControllersManager.h"
 
 using namespace common;
 
 // This is the entry point to the mod.
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_skse, F4SE::PluginInfo* a_info)
 {
-    return f4cf::g_mod->onF4SEPluginQuery(a_skse, a_info);
+    return g_mod->onF4SEPluginQuery(a_skse, a_info);
 }
 
 // This is the entry point to the mod.
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
-    return f4cf::g_mod->onF4SEPluginLoad(a_f4se);
+    return g_mod->onF4SEPluginLoad(a_f4se);
 }
 
 namespace comfort_swim
@@ -62,8 +62,8 @@ namespace comfort_swim
             return;
         }
 
-        const auto primaryAxisValue = f4vr::VRControllers.getThumbstickValue(f4vr::Hand::Primary);
-        const auto offhandAxisValue = f4vr::VRControllers.getThumbstickValue(f4vr::Hand::Offhand);
+        const auto primaryAxisValue = vrcf::VRControllers.getThumbstickValue(vrcf::Hand::Primary);
+        const auto offhandAxisValue = vrcf::VRControllers.getThumbstickValue(vrcf::Hand::Offhand);
 
         if (!fNotEqual(offhandAxisValue.x, 0) && !fNotEqual(offhandAxisValue.y, 0) && !fNotEqual(primaryAxisValue.y, 0)) {
             logger::trace("no user controllers input - noop");
@@ -127,7 +127,7 @@ namespace comfort_swim
      */
     void ComfortSwim::adjustDeltasForWandDirectionalMovement(float& dx, float& dy)
     {
-        const float controllerRelativeHeading = f4vr::VRControllers.getControllerRelativeHeading(f4vr::Hand::Offhand);
+        const float controllerRelativeHeading = vrcf::VRControllers.getControllerRelativeHeading(vrcf::Hand::Offhand);
         const float cosRelative = std::cos(controllerRelativeHeading);
         const float sinRelative = std::sin(controllerRelativeHeading);
 

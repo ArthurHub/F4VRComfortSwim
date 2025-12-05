@@ -5,7 +5,7 @@
 
 namespace comfort_swim
 {
-    class ComfortSwim : public f4cf::ModBase
+    class ComfortSwim : public ModBase
     {
     public:
         ComfortSwim() :
