@@ -4,7 +4,7 @@ using namespace common;
 
 namespace comfort_swim
 {
-    static constexpr auto DEFAULT_SECTION = std::string(Version::PROJECT).c_str();
+    const char* DEFAULT_SECTION = Version::PROJECT.data();
 
     void Config::loadIniConfigInternal(const CSimpleIniA& ini)
     {
