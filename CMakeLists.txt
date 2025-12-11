@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 4.2)
 
 
 # >>> Project
@@ -46,7 +46,7 @@ find_path(F4VRCommonFrameworkPathFind
     external/F4VRCommonFramework
 )
 if(${F4VRCommonFrameworkPathFind} STREQUAL "F4VRCommonFrameworkPathFind-NOTFOUND")
-  message(FATAL_ERROR ">> F4VRCommonFramework path not found! Did you init submodules or set F4VRCommonFrameworkPath?")
+  message(FATAL_ERROR ">> F4VRCommonFramework path not found in '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'!\n >> Did you init submodules? (git submodule update --init --recursive)\n >> or set F4VR_COMMON_FRAMEWORK_PATH?")
 endif()
 
 # >>> Create Project
