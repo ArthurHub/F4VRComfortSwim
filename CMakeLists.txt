@@ -35,24 +35,23 @@ else()
   message(FATAL_ERROR ">> Variable VCPKG_ROOT is not set!")
 endif()
 
-# >>> Locate F4VRCommonFramework (submodule or external path)
-set_from_environment(F4VRCommonFrameworkPath)
-find_path(F4VRCommonFrameworkPathFind
-  CMakeLists.txt
-  PATHS
-    ${F4VRCommonFrameworkPath}
-    F4VRCommonFramework
-    ../F4VRCommonFramework
-    external/F4VRCommonFramework
-)
-if(${F4VRCommonFrameworkPathFind} STREQUAL "F4VRCommonFrameworkPathFind-NOTFOUND")
-  message(FATAL_ERROR ">> F4VRCommonFramework path not found in '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'!\n >> Did you init submodules? (git submodule update --init --recursive)\n >> or set F4VR_COMMON_FRAMEWORK_PATH?")
+# >>> Locate F4VR-CommonFramework (submodule or external path)
+if(DEFINED F4VR_COMMON_FRAMEWORK_PATH AND NOT F4VR_COMMON_FRAMEWORK_PATH STREQUAL "")
+  set(F4VR_COMMON_FRAMEWORK_PATH_SELECTED ${F4VR_COMMON_FRAMEWORK_PATH} CACHE STRING "" FORCE)
+  message(">>> Using F4VR-CommonFramework from custom variable: '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'")
+else()
+  set(F4VR_COMMON_FRAMEWORK_PATH_SELECTED "${ROOT_DIR}/external/F4VR-CommonFramework" CACHE STRING "" FORCE)
+  message(">>> Using F4VR-CommonFramework in external: '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'")
+endif()
+# Verify path is correct
+if(NOT EXISTS "${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}/src/ModBase.h")
+  message(FATAL_ERROR ">> F4VR-CommonFramework path not found in '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'!\n >> Did you init submodules? (git submodule update --init --recursive)\n >> or set F4VR_COMMON_FRAMEWORK_PATH?")
 endif()
 
 # >>> Create Project
 project(${NAME} VERSION ${VERSION} LANGUAGES CXX)
 message(">>> Building '${PROJECT_NAME}' v:${PROJECT_VERSION}")
-message(">>> Using F4VRCommonFramework: '${F4VRCommonFrameworkPathFind}'")
+message(">>> Using F4VR-CommonFramework: '${F4VR_COMMON_FRAMEWORK_PATH_SELECTED}'")
 
 # >>> Build flags
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
@@ -62,7 +61,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG OFF)
 
 # >>> Bring in the framework (it brings CommonLibF4 transitively)
-add_subdirectory(${F4VRCommonFrameworkPathFind} "F4VRCommonFramework" EXCLUDE_FROM_ALL)
+add_subdirectory(${F4VR_COMMON_FRAMEWORK_PATH_SELECTED} "F4VR-CommonFramework" EXCLUDE_FROM_ALL)
 # >>> IMPORTANT:
 # For CommonLibF4 to build successfully you must satisfy it's vcpkg dependencies
 # AND specify <"builtin-baseline": "b4a3d89125e45bc8f80fb94bef9761d4f4e14fb9"> as it will fail to build with latests"
